@@ -44,6 +44,8 @@ public class Matching extends BaseEntity {
         this.maleMember = newMaleMember;
     }
     //매칭 수락 거절 로직
+    
+
     public void selectByFemale() {
         this.status = MatchingStatus.PENDING_MALE_ACCEPTANCE;
     }
