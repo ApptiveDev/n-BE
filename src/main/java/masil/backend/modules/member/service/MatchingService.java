@@ -67,9 +67,6 @@ public class MatchingService {
                 MatchingStatus.PENDING_FEMALE_SELECTION
         );
         
-        // 선택된 매칭을 수락 대기 상태로 변경
-        selectedMatching.selectByFemale();
-        
         // 같은 여성의 다른 매칭들을 거절 상태로 변경
         otherMatchings.forEach(matching -> {
             if (!matching.getId().equals(matchingId)) {
@@ -77,8 +74,8 @@ public class MatchingService {
             }
         });
         
-        // 상태 변경 후 알림 전송
-        sendNotificationIfStatusChanged(selectedMatching, femaleMember);
+        // 상태 변경 및 알림 전송 (항상 함께 호출되어야 함)
+        changeStatusToPendingMaleAcceptance(selectedMatching, femaleMember);
         
         log.info("여성이 남성 선택: femaleMemberId={}, matchingId={}, selectedMaleId={}", 
                 femaleMemberId, matchingId, selectedMatching.getMaleMember().getId() 
@@ -102,6 +99,11 @@ public class MatchingService {
         );
         
         log.info("남성 대기 매칭 조회: maleMemberId={}, 수락대기 매칭 수={}", maleMemberId, matchings.size());
+        
+        // 매칭이 없으면 에러 반환 (여자가 아직 수락하지 않음)
+        if (matchings.isEmpty()) {
+            throw new IllegalArgumentException("대기 중인 매칭이 없습니다. 여성이 아직 선택하지 않았거나 이미 처리된 매칭입니다.");
+        }
         
         return matchings.stream()
                 .map(MalePendingMatchingResponse::from)
@@ -205,19 +207,35 @@ public class MatchingService {
         return FemaleMatchingListResponse.fromList(matchings);
     }
     
-    //매칭 상태가 PENDING_MALE_ACCEPTANCE로 변경되었을 때 남성에게 푸시 알림 전송 메서드    
-    private void sendNotificationIfStatusChanged(Matching matching, Member femaleMember) {
-        if (matching.getStatus() == MatchingStatus.PENDING_MALE_ACCEPTANCE) {
-            Member maleMember = matching.getMaleMember();
-            if (maleMember.getFcmToken() != null && !maleMember.getFcmToken().isBlank()) {
-                String title = "매칭 알림";
-                String body = String.format("%s님이 당신을 선택했습니다. 수락하시겠습니까?", femaleMember.getName());
-                fcmService.sendPushNotification(maleMember.getFcmToken(), title, body);
-                log.info("매칭 상태 변경 알림 전송: matchingId={}, status={}, maleMemberId={}, femaleMemberId={}", 
-                        matching.getId(), matching.getStatus(), maleMember.getId(), femaleMember.getId());
-            } else {
-                log.warn("FCM 토큰이 없어 알림을 전송할 수 없습니다: maleMemberId={}", maleMember.getId());
-            }
+    //매칭 상태를 PENDING_MALE_ACCEPTANCE로 변경하고 알림 전송 메서드
+
+    private void changeStatusToPendingMaleAcceptance(Matching matching, Member femaleMember) {
+        // 상태 변경
+        matching.selectByFemale();
+        // 상태 변경 후 알림 전송 (항상 함께 실행됨)
+        sendNotificationForPendingMaleAcceptance(matching, femaleMember);
+    }
+    
+
+    //PENDING_MALE_ACCEPTANCE 상태로 변경된 매칭에 대해 남성에게 푸시 알림 전송
+
+    private void sendNotificationForPendingMaleAcceptance(Matching matching, Member femaleMember) {
+        // 상태 확인 (안전장치)
+        if (matching.getStatus() != MatchingStatus.PENDING_MALE_ACCEPTANCE) {
+            log.warn("매칭 상태가 PENDING_MALE_ACCEPTANCE가 아닙니다. 알림을 전송하지 않습니다. matchingId={}, status={}", 
+                    matching.getId(), matching.getStatus());
+            return;
+        }
+        
+        Member maleMember = matching.getMaleMember();
+        if (maleMember.getFcmToken() != null && !maleMember.getFcmToken().isBlank()) {
+            String title = "매칭 알림";
+            String body = String.format("%s님이 당신을 선택했습니다. 수락하시겠습니까?", femaleMember.getName());
+            fcmService.sendPushNotification(maleMember.getFcmToken(), title, body);
+            log.info("매칭 상태 변경 알림 전송: matchingId={}, status={}, maleMemberId={}, femaleMemberId={}", 
+                    matching.getId(), matching.getStatus(), maleMember.getId(), femaleMember.getId());
+        } else {
+            log.warn("FCM 토큰이 없어 알림을 전송할 수 없습니다: maleMemberId={}", maleMember.getId());
         }
     }
 }

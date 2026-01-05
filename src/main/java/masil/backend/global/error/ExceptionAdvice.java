@@ -24,6 +24,11 @@ public class ExceptionAdvice {
         return ResponseEntity.status(e.exceptionType().httpStatus()).body(new ExceptionResponse(errorMessage));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ExceptionResponse> illegalArgumentException(final IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(new ExceptionResponse(e.getMessage()));
+    }
+
     private static String getErrorMessage(final BindException e) {
         final BindingResult bindingResult = e.getBindingResult();
         return bindingResult.getFieldErrors().stream()
