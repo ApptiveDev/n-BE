@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import masil.backend.modules.member.dto.response.MatchedMemberListResponse;
 import masil.backend.modules.member.repository.MatchingRepository;
-import masil.backend.modules.member.entity.Matching;
 
 
 import java.util.List;

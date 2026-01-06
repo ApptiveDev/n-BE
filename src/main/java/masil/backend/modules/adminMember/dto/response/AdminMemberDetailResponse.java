@@ -20,7 +20,7 @@ public record AdminMemberDetailResponse(
         Education education,
         Asset asset,
         String otherInfo,
-        String profileImageUrl,
+        String thumbnailImageUrl,
         LocalDateTime createdAt
 ) {
     public static AdminMemberDetailResponse from(Member member) {
@@ -39,7 +39,7 @@ public record AdminMemberDetailResponse(
                 member.getEducation(),
                 member.getAsset(),
                 member.getOtherInfo(),
-                member.getProfileImageUrl(),
+                member.getThumbnailImageUrl(),
                 member.getCreatedAt()
         );
     }

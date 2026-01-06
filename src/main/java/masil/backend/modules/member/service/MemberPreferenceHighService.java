@@ -22,6 +22,7 @@ public class MemberPreferenceHighService {
     private final MemberPreferenceLowService memberPreferenceLowService;
     private final MemberLowService memberLowService;
     private final MemberAiService memberAiService;
+    private final MemberImageLowService memberImageLowService;
 
     public void saveMemberPreference(
             final Long memberId,
@@ -37,6 +38,8 @@ public class MemberPreferenceHighService {
                 request.religion(), request.education(), request.asset(),
                 request.otherInfo(), request.thumbnailImageUrl()
         );
+
+        memberImageLowService.saveImages(member, request.profileImageUrls());
 
         validatePriorityDuplication(request.priority1(), request.priority2(), request.priority3());
 

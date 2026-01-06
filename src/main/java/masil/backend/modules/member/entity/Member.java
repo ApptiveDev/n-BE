@@ -89,7 +89,7 @@ public class Member extends BaseEntity {
     private String otherInfo;
 
     @Column
-    private String profileImageUrl;
+    private String thumbnailImageUrl;
 
     @Column(columnDefinition = "TEXT")
     private String aiSummary;
@@ -103,7 +103,7 @@ public class Member extends BaseEntity {
             final String name, final String email, final String password,
             final Gender gender, final Integer height, final Integer weight, final String residenceArea,
             final SmokingStatus smokingStatus, final DrinkingFrequency drinkingFrequency, final Religion religion,
-            final Education education, final Asset asset, final String otherInfo, final String profileImageUrl, final String aiSummary
+            final Education education, final Asset asset, final String otherInfo, final String thumbnailImageUrl, final String aiSummary
     ) {
         this.id = id;
         this.provider = provider != null ? provider : Provider.LOCAL;
@@ -123,7 +123,7 @@ public class Member extends BaseEntity {
         this.education = education;
         this.asset = asset;
         this.otherInfo = otherInfo;
-        this.profileImageUrl = profileImageUrl;
+        this.thumbnailImageUrl = thumbnailImageUrl;
         this.aiSummary = aiSummary;
     }
 
@@ -139,7 +139,7 @@ public class Member extends BaseEntity {
             final Education education,
             final Asset asset,
             final String otherInfo,
-            final String profileImageUrl
+            final String thumbnailImageUrl
     ) {
         this.name = name;
         this.gender = gender;
@@ -152,17 +152,11 @@ public class Member extends BaseEntity {
         this.education = education;
         this.asset = asset;
         this.otherInfo = otherInfo;
-        this.profileImageUrl = profileImageUrl;
+        this.thumbnailImageUrl = thumbnailImageUrl;
     }
 
     public void updateAiSummary(final String aiSummary) {
         this.aiSummary = aiSummary;
-    }
-
-    public boolean isProfileComplete() {
-        return gender != null && height != null && weight != null
-                && residenceArea != null && smokingStatus != null
-                && drinkingFrequency != null && religion != null;
     }
 
     public void changeToConnecting() {

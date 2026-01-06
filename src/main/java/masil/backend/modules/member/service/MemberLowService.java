@@ -49,7 +49,7 @@ public class MemberLowService {
                 .email(userInfo.email())
                 .provider(Provider.GOOGLE)
                 .providerId(userInfo.providerId())
-                .profileImageUrl(userInfo.profileImageUrl())
+                .thumbnailImageUrl(userInfo.profileImageUrl())
                 .build();
 
         return memberRepository.save(member);
@@ -75,7 +75,7 @@ public class MemberLowService {
                .education(profileRequest.education())
                .asset(profileRequest.asset())
                .otherInfo(profileRequest.otherInfo())
-               .profileImageUrl(tempUserInfo.profileImageUrl())
+               .thumbnailImageUrl(tempUserInfo.profileImageUrl())
                .build();
    
        return memberRepository.save(member);
@@ -107,12 +107,12 @@ public class MemberLowService {
             final Education education,
             final Asset asset,
             final String otherInfo,
-            final String profileImageUrl
+            final String thumbnailImageUrl
     ) {
         member.updateProfile(
                 name, gender, height, weight, residenceArea,
                 smokingStatus, drinkingFrequency, religion,
-                education, asset, otherInfo, profileImageUrl
+                education, asset, otherInfo, thumbnailImageUrl
         );
     }
 }
