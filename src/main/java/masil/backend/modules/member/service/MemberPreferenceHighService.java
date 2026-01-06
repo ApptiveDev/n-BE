@@ -39,6 +39,7 @@ public class MemberPreferenceHighService {
                 request.otherInfo(), request.thumbnailImageUrl()
         );
 
+        memberImageLowService.deleteAllByMemberId(memberId);
         memberImageLowService.saveImages(member, request.profileImageUrls());
 
         validatePriorityDuplication(request.priority1(), request.priority2(), request.priority3());
@@ -47,7 +48,7 @@ public class MemberPreferenceHighService {
         final String preferredJobsJson = memberPreferenceLowService.convertJobListToJson(request.preferredJobs());
         final String avoidedJobsJson = memberPreferenceLowService.convertJobListToJson(request.avoidedJobs());
 
-        memberPreferenceLowService.saveMemberPreference(
+        memberPreferenceLowService.saveOrUpdateMemberPreference(
                 member,
                 request.preferredHeightMin(), request.preferredHeightMax(),
                 avoidReligionsBitmask, request.preferredEducationLevel(), request.preferredAppearanceStyle(),

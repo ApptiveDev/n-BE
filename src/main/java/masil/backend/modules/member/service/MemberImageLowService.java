@@ -26,4 +26,13 @@ public class MemberImageLowService {
             memberImageRepository.save(image);
         }
     }
+
+    @Transactional
+    public void deleteAllByMemberId(final Long memberId) {
+        memberImageRepository.deleteByMemberId(memberId);
+    }
+
+    public List<MemberImage> findByMemberId(final Long memberId) {
+        return memberImageRepository.findByMemberIdOrderByDisplayOrder(memberId);
+    }
 }

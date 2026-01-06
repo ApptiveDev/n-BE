@@ -31,9 +31,19 @@ public class MemberPreferenceLowService {
         return memberPreferenceRepository.findByMemberId(memberId);
     }
 
+    public String convertJobListToJson(final List<JobType> jobs) {
+        if (jobs == null || jobs.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(jobs);
+        } catch (JsonProcessingException e) {
+            throw new GeneralException(FAILED_TO_CONVERT_JSON);
+        }
+    }
 
     @Transactional
-    public void saveMemberPreference(
+    public void saveOrUpdateMemberPreference(
             final Member member,
             final Integer preferredHeightMin,
             final Integer preferredHeightMax,
@@ -53,38 +63,29 @@ public class MemberPreferenceLowService {
             final PreferenceCategory priority2,
             final PreferenceCategory priority3
     ) {
-        final MemberPreference preference = new MemberPreference(
-                member,
-                preferredHeightMin,
-                preferredHeightMax,
-                avoidReligionsBitmask,
-                preferredEducationLevel,
-                preferredAppearanceStyle,
-                parentAssetRequirement,
-                preferredAssetMin,
-                preferredAssetMax,
-                preferredJobsJson,
-                avoidedJobsJson,
-                mbti1,
-                mbti2,
-                mbti3,
-                mbti4,
-                priority1,
-                priority2,
-                priority3
-        );
+        final Optional<MemberPreference> existingPreference = findByMemberId(member.getId());
 
-        memberPreferenceRepository.save(preference);
-    }
-
-    public String convertJobListToJson(final List<JobType> jobs) {
-        if (jobs == null || jobs.isEmpty()) {
-            return null;
-        }
-        try {
-            return objectMapper.writeValueAsString(jobs);
-        } catch (JsonProcessingException e) {
-            throw new GeneralException(FAILED_TO_CONVERT_JSON);
+        if (existingPreference.isPresent()) {
+            // 수정
+            existingPreference.get().updatePreference(
+                    preferredHeightMin, preferredHeightMax,
+                    avoidReligionsBitmask, preferredEducationLevel, preferredAppearanceStyle,
+                    parentAssetRequirement, preferredAssetMin, preferredAssetMax,
+                    preferredJobsJson, avoidedJobsJson,
+                    mbti1, mbti2, mbti3, mbti4
+            );
+        } else {
+            // 신규 저장
+            final MemberPreference preference = new MemberPreference(
+                    member,
+                    preferredHeightMin, preferredHeightMax,
+                    avoidReligionsBitmask, preferredEducationLevel, preferredAppearanceStyle,
+                    parentAssetRequirement, preferredAssetMin, preferredAssetMax,
+                    preferredJobsJson, avoidedJobsJson,
+                    mbti1, mbti2, mbti3, mbti4,
+                    priority1, priority2, priority3
+            );
+            memberPreferenceRepository.save(preference);
         }
     }
 }
