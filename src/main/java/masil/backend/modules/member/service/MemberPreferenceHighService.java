@@ -3,10 +3,12 @@ package masil.backend.modules.member.service;
 import static masil.backend.modules.member.exception.MemberExceptionType.MEMBER_PREFERENCES_NOT_FOUND;
 import static masil.backend.modules.member.exception.MemberExceptionType.MEMBER_PRIORITY_DUPLICATE_ERROR;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import masil.backend.modules.member.dto.request.SaveMemberPreferenceRequest;
 import masil.backend.modules.member.dto.response.MemberPreferenceResponse;
 import masil.backend.modules.member.entity.Member;
+import masil.backend.modules.member.entity.MemberImage;
 import masil.backend.modules.member.entity.MemberPreference;
 import masil.backend.modules.member.enums.MemberStatus;
 import masil.backend.modules.member.enums.PreferenceCategory;
@@ -68,7 +70,10 @@ public class MemberPreferenceHighService {
         final MemberPreference preference = memberPreferenceLowService.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberException(MEMBER_PREFERENCES_NOT_FOUND));
 
-        return new MemberPreferenceResponse(preference);
+        final Member member = memberLowService.getValidateExistMemberById(memberId);
+        final List<MemberImage> memberImages = memberImageLowService.findByMemberId(memberId);
+
+        return new MemberPreferenceResponse(preference, member, memberImages);
     }
 
     private void validatePriorityDuplication(

@@ -3,6 +3,8 @@ package masil.backend.modules.member.dto.response;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import masil.backend.modules.member.entity.Member;
+import masil.backend.modules.member.entity.MemberImage;
 import masil.backend.modules.member.entity.MemberPreference;
 import masil.backend.modules.member.enums.AppearanceStyle;
 import masil.backend.modules.member.enums.EducationLevel;
@@ -27,11 +29,13 @@ public record MemberPreferenceResponse(
         String mbtiE,
         String mbtiN,
         String mbtiT,
-        String mbtiJ
+        String mbtiJ,
+        String thumbnailImageUrl,
+        List<String> profileImageUrls
 ) {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public MemberPreferenceResponse(MemberPreference preference) {
+    public MemberPreferenceResponse(MemberPreference preference, Member member, List<MemberImage> memberImages) {
         this(
                 preference.getPreferredHeightMin(),
                 preference.getPreferredHeightMax(),
@@ -46,7 +50,11 @@ public record MemberPreferenceResponse(
                 preference.getMbtiE(),
                 preference.getMbtiN(),
                 preference.getMbtiT(),
-                preference.getMbtiJ()
+                preference.getMbtiJ(),
+                member.getThumbnailImageUrl(),
+                memberImages.stream()
+                        .map(MemberImage::getImageUrl)
+                        .toList()
         );
     }
 
