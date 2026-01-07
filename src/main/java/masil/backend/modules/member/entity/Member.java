@@ -1,6 +1,5 @@
 package masil.backend.modules.member.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -94,6 +93,9 @@ public class Member extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String aiSummary;
 
+    @Column(columnDefinition = "TEXT")
+    private String aiSummaryJp;
+
     @Column(length = 500)
     private String fcmToken;
 
@@ -103,7 +105,8 @@ public class Member extends BaseEntity {
             final String name, final String email, final String password,
             final Gender gender, final Integer height, final Integer weight, final String residenceArea,
             final SmokingStatus smokingStatus, final DrinkingFrequency drinkingFrequency, final Religion religion,
-            final Education education, final Asset asset, final String otherInfo, final String thumbnailImageUrl, final String aiSummary
+            final Education education, final Asset asset, final String otherInfo, final String thumbnailImageUrl,
+            final String aiSummary, final String aiSummaryJp  // 추가
     ) {
         this.id = id;
         this.provider = provider != null ? provider : Provider.LOCAL;
@@ -125,6 +128,7 @@ public class Member extends BaseEntity {
         this.otherInfo = otherInfo;
         this.thumbnailImageUrl = thumbnailImageUrl;
         this.aiSummary = aiSummary;
+        this.aiSummaryJp = aiSummaryJp;  // 추가
     }
 
     public void updateProfile(
@@ -157,6 +161,10 @@ public class Member extends BaseEntity {
 
     public void updateAiSummary(final String aiSummary) {
         this.aiSummary = aiSummary;
+    }
+
+    public void updateAiSummaryJp(final String aiSummaryJp) {
+        this.aiSummaryJp = aiSummaryJp;
     }
 
     public void changeToConnecting() {

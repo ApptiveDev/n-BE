@@ -26,20 +26,27 @@ public class MemberAiService {
                 return;
             }
 
-            final String prompt = createPrompt(otherInfo);
-            final String aiSummary = callGptApi(prompt);
+            // 한국어 요약 생성
+            final String koreanPrompt = createKoreanPrompt(otherInfo);
+            final String aiSummaryKr = callGptApi(koreanPrompt);
+
+            // 일본어 요약 생성
+            final String japanesePrompt = createJapanesePrompt(otherInfo);
+            final String aiSummaryJp = callGptApi(japanesePrompt);
 
             // 회원 정보 업데이트
             final Member member = memberLowService.getValidateExistMemberById(memberId);
-            member.updateAiSummary(aiSummary);
+            member.updateAiSummary(aiSummaryKr);
+            member.updateAiSummaryJp(aiSummaryJp);
 
-            log.info("AI 요약 생성 완료 - memberId: {}, summary: {}", memberId, aiSummary);
+            log.info("AI 요약 생성 완료 - memberId: {}, summaryKr: {}, summaryJp: {}",
+                    memberId, aiSummaryKr, aiSummaryJp);
         } catch (Exception e) {
             log.error("AI 요약 생성 실패 - memberId: {}", memberId, e);
         }
     }
 
-    private String createPrompt(final String otherInfo) {
+    private String createKoreanPrompt(final String otherInfo) {
         return String.format("""
                 당신은 소개팅 앱의 회원 프로필을 요약하는 AI입니다.
                 다음 자기소개를 읽고, 이 사람을 1-2줄로 매력적이고 간결하게 요약해주세요.
@@ -57,6 +64,27 @@ public class MemberAiService {
                 예시:
                 - "여행과 독서를 사랑하며, 새로운 경험에 열려있는 긍정적인 사람입니다."
                 - "운동과 건강한 라이프스타일을 추구하며, 솔직하고 진솔한 대화를 중요시하는 분입니다."
+                """, otherInfo);
+    }
+
+    private String createJapanesePrompt(final String otherInfo) {
+        return String.format("""
+                あなたはマッチングアプリの会員プロフィールを要約するAIです。
+                次の自己紹介を読んで、この人を1-2行で魅力的かつ簡潔に要約してください。
+                
+                [自己紹介]
+                %s
+                
+                要件:
+                1. 必ず1-2行以内で作成
+                2. この人の魅力ポイントと特徴を強調
+                3. 敬語は使わず、自然な紹介形式で作成
+                4. 三人称視点で作成 (例: "〜な人です。", "〜を好きな方です。")
+                5. ポジティブで魅力的な表現を使用
+                
+                例:
+                - "旅行と読書を愛し、新しい経験にオープンなポジティブな人です。"
+                - "運動と健康的なライフスタイルを追求し、率直で真摯な会話を大切にする方です。"
                 """, otherInfo);
     }
 

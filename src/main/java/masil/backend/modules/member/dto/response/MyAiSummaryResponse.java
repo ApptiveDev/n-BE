@@ -5,13 +5,15 @@ import masil.backend.modules.member.entity.Member;
 public record MyAiSummaryResponse(
         Long memberId,
         String name,
-        String aiSummary
+        String aiSummaryKo,
+        String aiSummaryJa
 ) {
     public MyAiSummaryResponse(final Member member) {
         this(
                 member.getId(),
                 member.getName(),
-                member.getAiSummary()
+                member.getAiSummary(),
+                member.getAiSummaryJp()
         );
     }
 }
