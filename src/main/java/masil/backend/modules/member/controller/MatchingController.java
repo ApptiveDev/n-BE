@@ -43,13 +43,12 @@ public class MatchingController {
     }
 
     //여성이 매칭 거절 (해당 여성의 모든 선택된 매칭을 거절)
-    @PostMapping("/female/{matchingId}/reject")
+    @PostMapping("/female/reject")
     public ResponseEntity<Void> rejectMatchingByFemale(
-            @LoginMember MemberDetails memberDetails,
-            @PathVariable Long matchingId
+            @LoginMember MemberDetails memberDetails
     ) {
-        log.info("여성이 매칭 거절 요청: memberId={}, matchingId={}", memberDetails.memberId(), matchingId);
-        matchingService.rejectMatchingByFemale(memberDetails.memberId(), matchingId);
+        log.info("여성이 모든 매칭 거절 요청: memberId={}", memberDetails.memberId());
+        matchingService.rejectMatchingByFemale(memberDetails.memberId());
         return ResponseEntity.ok().build();
     }
 
