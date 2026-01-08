@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import masil.backend.global.security.provider.JwtProvider;
 import masil.backend.modules.member.dto.request.SignInRequest;
 import masil.backend.modules.member.dto.request.SignUpRequest;
+import masil.backend.modules.member.dto.response.MemberInfoResponse;
 import masil.backend.modules.member.dto.response.MyAiSummaryResponse;
 import masil.backend.modules.member.dto.response.MyProfileResponse;
 import masil.backend.modules.member.dto.response.MyStatusResponse;
@@ -60,6 +61,13 @@ public class MemberHighService {
         final Member member = memberLowService.getValidateExistMemberById(memberId);
         final List<MemberImage> memberImages = memberImageLowService.findByMemberId(memberId);
         return new MyProfileResponse(member, memberImages);
+    }
+
+    @Transactional(readOnly = true)
+    public MemberInfoResponse getMemberInfo(final Long memberId) {
+        final Member member = memberLowService.getValidateExistMemberById(memberId);
+        final List<MemberImage> memberImages = memberImageLowService.findByMemberId(memberId);
+        return MemberInfoResponse.from(member, memberImages);
     }
 
     public void withdrawMember(final Long memberId) {
