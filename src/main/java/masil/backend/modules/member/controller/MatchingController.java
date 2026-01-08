@@ -42,7 +42,7 @@ public class MatchingController {
         return ResponseEntity.ok().build();
     }
 
-    //여성이 매칭 거절
+    //여성이 매칭 거절 (해당 여성의 모든 선택된 매칭을 거절)
     @PostMapping("/female/{matchingId}/reject")
     public ResponseEntity<Void> rejectMatchingByFemale(
             @LoginMember MemberDetails memberDetails,

@@ -275,7 +275,7 @@ public class MatchingService {
                 .toList();
     }
 
-    //여성이 매칭 거절
+    //여성이 매칭 거절 (해당 여성의 모든 선택된 매칭 거절)
     public void rejectMatchingByFemale(Long femaleMemberId, Long matchingId) {
         // 여성 유저 검증
         Member femaleMember = memberLowService.getValidateExistMemberById(femaleMemberId);
@@ -284,7 +284,7 @@ public class MatchingService {
             throw new IllegalArgumentException("일본 여성 유저만 매칭을 거절할 수 있습니다.");
         }
 
-        // 매칭 조회 및 검증
+        // 매칭 조회 및 검증 (권한 확인용)
         Matching matching = matchingRepository.findById(matchingId)
                 .orElseThrow(() -> new IllegalArgumentException("매칭을 찾을 수 없습니다."));
 
@@ -298,8 +298,34 @@ public class MatchingService {
             throw new IllegalArgumentException("선택한 매칭만 거절할 수 있습니다.");
         }
 
-        // 매칭 거절
-        matching.reject();
+        // 해당 여성의 모든 선택된 매칭 조회 (수락 대기 또는 수락됨 상태)
+        List<MatchingStatus> statuses = List.of(
+                MatchingStatus.PENDING_FEMALE_SELECTION,
+                MatchingStatus.PENDING_MALE_ACCEPTANCE,
+                MatchingStatus.ACCEPTED
+        );
+        
+        List<Matching> allSelectedMatchings = matchingRepository.findByFemaleMemberIdAndStatusIn(
+                femaleMemberId,
+                statuses
+        );
+
+        log.info("여성이 매칭 거절 시작: femaleMemberId={}, 거절할 매칭 수={}", femaleMemberId, allSelectedMatchings.size());
+
+        // 모든 선택된 매칭 거절 및 각 남성의 상태 변경
+        for (Matching selectedMatching : allSelectedMatchings) {
+            // 매칭 거절
+            selectedMatching.reject();
+            
+            // 해당 남성의 상태 변경: CONNECTING → APPROVED (재매칭 가능하도록)
+            Member maleMember = selectedMatching.getMaleMember();
+            if (maleMember.getStatus() == MemberStatus.CONNECTING) {
+                maleMember.changeStatus(MemberStatus.APPROVED);
+                log.info("여성 매칭 거절로 인한 남성 상태 변경: maleMemberId={}, CONNECTING → APPROVED", maleMember.getId());
+            }
+            
+            log.info("매칭 거절 완료: matchingId={}, maleMemberId={}", selectedMatching.getId(), maleMember.getId());
+        }
 
         // 여성 상태 변경: CONNECTING → APPROVED (재매칭 가능하도록)
         if (femaleMember.getStatus() == MemberStatus.CONNECTING) {
@@ -307,8 +333,7 @@ public class MatchingService {
             log.info("여성 매칭 거절로 인한 상태 변경: femaleMemberId={}, CONNECTING → APPROVED", femaleMemberId);
         }
 
-        log.info("여성이 매칭 거절: femaleMemberId={}, matchingId={}, maleMemberId={}",
-                femaleMemberId, matchingId, matching.getMaleMember().getId());
+        log.info("여성이 모든 매칭 거절 완료: femaleMemberId={}, 총 거절된 매칭 수={}", femaleMemberId, allSelectedMatchings.size());
     }
 
     //매칭 상태를 PENDING_MALE_ACCEPTANCE로 변경하고 알림 전송 메서드
