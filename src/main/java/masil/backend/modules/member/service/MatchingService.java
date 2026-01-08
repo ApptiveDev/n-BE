@@ -9,6 +9,7 @@ import masil.backend.modules.member.entity.Member;
 import masil.backend.modules.member.entity.MemberImage;
 import masil.backend.modules.member.enums.Gender;
 import masil.backend.modules.member.enums.MatchingStatus;
+import masil.backend.modules.member.enums.MemberStatus;
 import masil.backend.modules.member.repository.MatchingRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -259,6 +260,42 @@ public class MatchingService {
                         memberImagesMap.get(matching.getMaleMember().getId())
                 ))
                 .toList();
+    }
+
+    //여성이 매칭 거절
+    public void rejectMatchingByFemale(Long femaleMemberId, Long matchingId) {
+        // 여성 유저 검증
+        Member femaleMember = memberLowService.getValidateExistMemberById(femaleMemberId);
+
+        if (femaleMember.getGender() != Gender.JAPANESE_FEMALE) {
+            throw new IllegalArgumentException("일본 여성 유저만 매칭을 거절할 수 있습니다.");
+        }
+
+        // 매칭 조회 및 검증
+        Matching matching = matchingRepository.findById(matchingId)
+                .orElseThrow(() -> new IllegalArgumentException("매칭을 찾을 수 없습니다."));
+
+        if (!matching.getFemaleMember().getId().equals(femaleMemberId)) {
+            throw new IllegalArgumentException("본인의 매칭만 거절할 수 있습니다.");
+        }
+
+        // 여성이 선택한 매칭만 거절 가능 (수락 대기 또는 수락됨 상태)
+        if (matching.getStatus() != MatchingStatus.PENDING_MALE_ACCEPTANCE 
+                && matching.getStatus() != MatchingStatus.ACCEPTED) {
+            throw new IllegalArgumentException("선택한 매칭만 거절할 수 있습니다.");
+        }
+
+        // 매칭 거절
+        matching.reject();
+
+        // 여성 상태 변경: CONNECTING → APPROVED (재매칭 가능하도록)
+        if (femaleMember.getStatus() == MemberStatus.CONNECTING) {
+            femaleMember.changeStatus(MemberStatus.APPROVED);
+            log.info("여성 매칭 거절로 인한 상태 변경: femaleMemberId={}, CONNECTING → APPROVED", femaleMemberId);
+        }
+
+        log.info("여성이 매칭 거절: femaleMemberId={}, matchingId={}, maleMemberId={}",
+                femaleMemberId, matchingId, matching.getMaleMember().getId());
     }
 
     //매칭 상태를 PENDING_MALE_ACCEPTANCE로 변경하고 알림 전송 메서드

@@ -42,6 +42,17 @@ public class MatchingController {
         return ResponseEntity.ok().build();
     }
 
+    //여성이 매칭 거절
+    @PostMapping("/female/{matchingId}/reject")
+    public ResponseEntity<Void> rejectMatchingByFemale(
+            @LoginMember MemberDetails memberDetails,
+            @PathVariable Long matchingId
+    ) {
+        log.info("여성이 매칭 거절 요청: memberId={}, matchingId={}", memberDetails.memberId(), matchingId);
+        matchingService.rejectMatchingByFemale(memberDetails.memberId(), matchingId);
+        return ResponseEntity.ok().build();
+    }
+    
     //남성에게 대기 매칭 조회 (수락 대기 중인 매칭)
     @GetMapping("/male/pendingMatching")
     public ResponseEntity<List<MalePendingMatchingResponse>> getMalePendingMatchings(
