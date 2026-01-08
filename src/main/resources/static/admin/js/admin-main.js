@@ -232,7 +232,59 @@ function renderMemberDetail(member) {
     const content = document.getElementById('member-detail-content');
     const footer = document.getElementById('member-detail-footer');
     
+    // 프로필 이미지 섹션 (썸네일)
+    const profileImageSection = member.thumbnailImageUrl ? `
+        <div style="text-align: center; margin-bottom: 20px; padding: 20px; background: #f7fafc; border-radius: 8px;">
+            <h4 style="margin-bottom: 15px; color: #667eea;">프로필 대표 사진</h4>
+            <img src="${member.thumbnailImageUrl}" 
+                 alt="${member.name} 프로필 사진" 
+                 style="max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer;"
+                 onclick="window.open('${member.thumbnailImageUrl}', '_blank')"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display: none; padding: 40px; color: #a0aec0;">
+                <p>이미지를 불러올 수 없습니다</p>
+                <a href="${member.thumbnailImageUrl}" target="_blank" style="color: #667eea; text-decoration: underline;">링크로 보기</a>
+            </div>
+        </div>
+    ` : `
+        <div style="text-align: center; margin-bottom: 20px; padding: 40px; background: #f7fafc; border-radius: 8px; color: #a0aec0;">
+            <p>등록된 프로필 대표 사진이 없습니다</p>
+        </div>
+    `;
+    
+    // 추가 이미지 갤러리
+    const imageGallerySection = (member.imageUrls && member.imageUrls.length > 0) ? `
+        <div style="margin-bottom: 20px; padding: 20px; background: #f7fafc; border-radius: 8px;">
+            <h4 style="margin-bottom: 15px; color: #667eea;">📸 추가 사진 (${member.imageUrls.length}장)</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
+                ${member.imageUrls.map((url, index) => `
+                    <div style="position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer;"
+                         onclick="window.open('${url}', '_blank')">
+                        <img src="${url}" 
+                             alt="사진 ${index + 1}" 
+                             style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s;"
+                             onmouseover="this.style.transform='scale(1.05)'"
+                             onmouseout="this.style.transform='scale(1)'"
+                             onerror="this.parentElement.innerHTML='<div style=\\'padding:20px;color:#a0aec0;text-align:center\\'>로딩 실패</div>'">
+                        <div style="position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">
+                            ${index + 1}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <p style="margin-top: 10px; font-size: 12px; color: #718096; text-align: center;">
+                💡 이미지를 클릭하면 크게 볼 수 있습니다
+            </p>
+        </div>
+    ` : `
+        <div style="text-align: center; margin-bottom: 20px; padding: 20px; background: #f7fafc; border-radius: 8px; color: #a0aec0;">
+            <p>등록된 추가 사진이 없습니다</p>
+        </div>
+    `;
+    
     content.innerHTML = `
+        ${profileImageSection}
+        ${imageGallerySection}
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div>
                 <h4 style="margin-bottom: 10px; color: #667eea;">기본 정보</h4>
@@ -261,7 +313,6 @@ function renderMemberDetail(member) {
             <div>
                 <h4 style="margin-bottom: 10px; color: #667eea;">추가 정보</h4>
                 <p><strong>기타 정보:</strong> ${member.otherInfo || '-'}</p>
-                ${member.profileImageUrl ? `<p><strong>프로필 이미지:</strong> <a href="${member.profileImageUrl}" target="_blank">보기</a></p>` : ''}
             </div>
         </div>
     `;

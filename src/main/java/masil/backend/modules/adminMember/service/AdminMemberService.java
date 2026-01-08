@@ -37,6 +37,7 @@ public class AdminMemberService {
     private final MatchingScoreService matchingScoreService;
     private final MatchingRepository matchingRepository;
     private final FcmService fcmService;
+    private final masil.backend.modules.member.service.MemberImageLowService memberImageLowService;
 
     //Use Case 1: 승인 대기 상태 유저 목록 조회
 
@@ -58,13 +59,14 @@ public class AdminMemberService {
     }
     
 
-    //Use Case 1: 유저 상세 정보 조회
+    //Use Case 1: 유저 상세 정보 조회 (이미지 포함)
     
     @Transactional(readOnly = true)
     public AdminMemberDetailResponse getMemberDetail(Long memberId) {
         Member member = memberLowService.getValidateExistMemberById(memberId);
-        log.info("유저 상세 정보 조회: memberId={}", memberId);
-        return AdminMemberDetailResponse.from(member);
+        var images = memberImageLowService.findByMemberId(memberId);
+        log.info("유저 상세 정보 조회: memberId={}, 이미지 수={}", memberId, images.size());
+        return AdminMemberDetailResponse.from(member, images);
     }
     
 
