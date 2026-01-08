@@ -214,6 +214,19 @@ public class MatchingService {
         // 매칭 거절
         matching.reject();
 
+        // 남성 상태 변경: CONNECTING → APPROVED (재매칭 가능하도록)
+        if (maleMember.getStatus() == MemberStatus.CONNECTING) {
+            maleMember.changeStatus(MemberStatus.APPROVED);
+            log.info("남성 매칭 거절로 인한 상태 변경: maleMemberId={}, CONNECTING → APPROVED", maleMemberId);
+        }
+
+        // 여성 상태 변경: CONNECTING → APPROVED (재매칭 가능하도록)
+        Member femaleMember = matching.getFemaleMember();
+        if (femaleMember.getStatus() == MemberStatus.CONNECTING) {
+            femaleMember.changeStatus(MemberStatus.APPROVED);
+            log.info("남성 매칭 거절로 인한 여성 상태 변경: femaleMemberId={}, CONNECTING → APPROVED", femaleMember.getId());
+        }
+
         log.info("남성이 매칭 거절: maleMemberId={}, matchingId={}, femaleMemberId={}",
                 maleMemberId, matchingId, matching.getFemaleMember().getId());
     }
