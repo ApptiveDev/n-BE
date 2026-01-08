@@ -3,6 +3,7 @@ package masil.backend.modules.member.controller;
 import lombok.RequiredArgsConstructor;
 import masil.backend.global.security.annotation.LoginMember;
 import masil.backend.global.security.dto.MemberDetails;
+import masil.backend.modules.member.dto.response.MemberInfoResponse;
 import masil.backend.modules.member.dto.response.MyAiSummaryResponse;
 import masil.backend.modules.member.dto.response.MyProfileResponse;
 import masil.backend.modules.member.dto.response.MyStatusResponse;
@@ -40,5 +41,13 @@ public class MemberController {
     ) {
         final MyProfileResponse profile = memberHighService.getMemberProfile(memberDetails.memberId());
         return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<MemberInfoResponse> getMyInfo(
+            @LoginMember MemberDetails memberDetails
+    ) {
+        final MemberInfoResponse memberInfo = memberHighService.getMemberInfo(memberDetails.memberId());
+        return ResponseEntity.ok(memberInfo);
     }
 }
