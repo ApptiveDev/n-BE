@@ -115,4 +115,10 @@ public class MemberLowService {
                 education, asset, otherInfo, thumbnailImageUrl
         );
     }
+
+    @Transactional
+    public void deleteMember(final Long memberId) {
+        final Member member = getValidateExistMemberById(memberId);
+        memberRepository.delete(member);
+    }
 }

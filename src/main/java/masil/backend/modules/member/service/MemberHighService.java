@@ -62,6 +62,10 @@ public class MemberHighService {
         return new MyProfileResponse(member, memberImages);
     }
 
+    public void withdrawMember(final Long memberId) {
+        memberLowService.deleteMember(memberId);
+    }
+
     private void checkCorrectPassword(final String savePassword, final String inputPassword) {
         if (!passwordEncoder.matches(inputPassword, savePassword)) {
             throw new MemberException(CANNOT_MATCH_PASSWORD);
