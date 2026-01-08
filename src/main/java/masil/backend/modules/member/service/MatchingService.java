@@ -178,16 +178,26 @@ public class MatchingService {
         // 매칭 수락
         matching.acceptByMale();
 
+        // 여성 Member를 명시적으로 조회 (Lazy Loading 문제 방지)
+        Long femaleMemberId = matching.getFemaleMember().getId();
+        Member femaleMember = memberLowService.getValidateExistMemberById(femaleMemberId);
+
         // 수락한 매칭의 남성과 여성 상태 변경: CONNECTING → CONNECTED
+        log.info("매칭 수락 전 상태 확인: maleMemberId={}, maleStatus={}, femaleMemberId={}, femaleStatus={}", 
+                maleMemberId, maleMember.getStatus(), femaleMemberId, femaleMember.getStatus());
+
         if (maleMember.getStatus() == MemberStatus.CONNECTING) {
             maleMember.changeStatus(MemberStatus.CONNECTED);
             log.info("남성 매칭 수락으로 인한 상태 변경: maleMemberId={}, CONNECTING → CONNECTED", maleMemberId);
+        } else {
+            log.warn("남성 상태가 CONNECTING이 아닙니다: maleMemberId={}, currentStatus={}", maleMemberId, maleMember.getStatus());
         }
 
-        Member femaleMember = matching.getFemaleMember();
         if (femaleMember.getStatus() == MemberStatus.CONNECTING) {
             femaleMember.changeStatus(MemberStatus.CONNECTED);
-            log.info("남성 매칭 수락으로 인한 여성 상태 변경: femaleMemberId={}, CONNECTING → CONNECTED", femaleMember.getId());
+            log.info("남성 매칭 수락으로 인한 여성 상태 변경: femaleMemberId={}, CONNECTING → CONNECTED", femaleMemberId);
+        } else {
+            log.warn("여성 상태가 CONNECTING이 아닙니다: femaleMemberId={}, currentStatus={}", femaleMemberId, femaleMember.getStatus());
         }
 
         // 같은 남성의 다른 매칭들을 거절 상태로 변경하고, 해당 여성들의 상태도 재매칭 가능하도록 변경
@@ -208,6 +218,7 @@ public class MatchingService {
                 maleMemberId, matchingId, femaleMember.getId(),
                 otherMatchings.size() - 1);
     }
+    //commit
 
     //남성이 매칭 거절
     public void rejectMatchingByMale(Long maleMemberId, Long matchingId) {
