@@ -42,12 +42,4 @@ public class MemberController {
         final MyProfileResponse profile = memberHighService.getMemberProfile(memberDetails.memberId());
         return ResponseEntity.ok(profile);
     }
-
-    @GetMapping("/info")
-    public ResponseEntity<MemberInfoResponse> getMyInfo(
-            @LoginMember MemberDetails memberDetails
-    ) {
-        final MemberInfoResponse memberInfo = memberHighService.getMemberInfo(memberDetails.memberId());
-        return ResponseEntity.ok(memberInfo);
-    }
 }
