@@ -218,6 +218,7 @@ public class MatchingService {
                 maleMemberId, matchingId, femaleMember.getId(),
                 otherMatchings.size() - 1);
     }
+    //commit
 
     //남성이 매칭 거절
     public void rejectMatchingByMale(Long maleMemberId, Long matchingId) {
