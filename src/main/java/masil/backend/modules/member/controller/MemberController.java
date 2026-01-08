@@ -42,4 +42,12 @@ public class MemberController {
         final MyProfileResponse profile = memberHighService.getMemberProfile(memberDetails.memberId());
         return ResponseEntity.ok(profile);
     }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<Void> withdrawMember(
+            @LoginMember MemberDetails memberDetails
+    ) {
+        memberHighService.withdrawMember(memberDetails.memberId());
+        return ResponseEntity.noContent().build();
+    }
 }
