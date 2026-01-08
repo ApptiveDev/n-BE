@@ -21,6 +21,7 @@ import masil.backend.modules.member.dto.response.MatchedMemberListResponse;
 import masil.backend.modules.member.repository.MatchingRepository;
 
 
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -131,15 +132,20 @@ public class AdminMemberService {
         log.info("매칭 후보 조회: 여성 memberId={}, 남성 후보 수={} (APPROVED 및 CONNECTING 상태)", 
                 femaleMemberId, maleMembers.size());
         
-        // 매칭 점수 계산 및 정렬
+        // 매칭 점수 계산 및 정렬 (색상, 레벨 정보 포함)
         return maleMembers.stream()
         .map(male -> {
             Double score = matchingScoreService.calculateMatchingScore(femaleMember, male);
             
+            // 그라데이션 색상 및 레벨 정보 추가
+            String color = matchingScoreService.getScoreColorGradient(score);
+            String level = matchingScoreService.getScoreLevel(score);
+            
             // 해당 남성의 매칭 정보 조회
             List<Matching> matchings = matchingRepository.findByMaleMemberId(male.getId());
             int matchingCount = matchings.size();
-            return MatchingScoreResponse.from(male, score, matchingCount);
+            
+            return MatchingScoreResponse.from(male, score, color, level, matchingCount);
         })
         .sorted((a, b) -> Double.compare(b.matchingScore(), a.matchingScore())) // 내림차순
         .collect(Collectors.toList());

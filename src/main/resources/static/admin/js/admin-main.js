@@ -452,7 +452,7 @@ function renderMatchingCandidates(candidates) {
                 </span>
             </td>
             <td>
-                <span class="score-badge" style="background: ${getScoreColor(candidate.matchingScore)}; color: white; padding: 4px 12px; border-radius: 12px; font-weight: 600;">
+                <span class="score-badge" style="background: ${candidate.scoreColor || getScoreColor(candidate.matchingScore)}; color: white; padding: 4px 12px; border-radius: 12px; font-weight: 600;">
                     ${candidate.matchingScore.toFixed(1)}점
                 </span>
             </td>
@@ -720,11 +720,25 @@ function formatDate(dateString) {
     return `${year}-${month}-${day}`;
 }
 
+
+/**
+ * 매칭 점수에 따른 그라데이션 색상 (5점 단위)
+ * 100점(어두운 초록) → 50점(진한 빨강)
+ * 50점 미만은 고정 빨강색
+ */
 function getScoreColor(score) {
-    if (score >= 80) return '#10b981'; // green
-    if (score >= 60) return '#3b82f6'; // blue
-    if (score >= 40) return '#f59e0b'; // yellow
-    return '#ef4444'; // red
+    if (score === 100) return '#1B5E20';  // 100: 어두운 초록
+    if (score >= 95) return '#2E7D32';    // 95: 진한 초록
+    if (score >= 90) return '#388E3C';    // 90: 초록
+    if (score >= 85) return '#4CAF50';    // 85: 밝은 초록
+    if (score >= 80) return '#8BC34A';    // 80: 연두
+    if (score >= 75) return '#CDDC39';    // 75: 라임
+    if (score >= 70) return '#FFEB3B';    // 70: 노랑
+    if (score >= 65) return '#FFC107';    // 65: amber
+    if (score >= 60) return '#FF9800';    // 60: 주황
+    if (score >= 55) return '#FF5722';    // 55: 진한 주황
+    if (score >= 50) return '#D32F2F';    // 50: 진한 빨강
+    return '#B71C1C';                     // 0-50: 더 진한 빨강 (고정)
 }
 
 function updateTotalCount(count) {
