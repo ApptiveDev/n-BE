@@ -32,7 +32,7 @@ public class MatchingController {
     }
     
     //여성이 남성 1명 선택
-    @PostMapping("/{matchingId}/select")
+    @PostMapping("/female/{matchingId}/select")
     public ResponseEntity<Void> selectMaleByFemale(
             @LoginMember MemberDetails memberDetails,
             @PathVariable Long matchingId
