@@ -178,15 +178,34 @@ public class MatchingService {
         // 매칭 수락
         matching.acceptByMale();
 
-        // 같은 남성의 다른 매칭들을 거절 상태로 변경
+        // 수락한 매칭의 남성과 여성 상태 변경: CONNECTING → CONNECTED
+        if (maleMember.getStatus() == MemberStatus.CONNECTING) {
+            maleMember.changeStatus(MemberStatus.CONNECTED);
+            log.info("남성 매칭 수락으로 인한 상태 변경: maleMemberId={}, CONNECTING → CONNECTED", maleMemberId);
+        }
+
+        Member femaleMember = matching.getFemaleMember();
+        if (femaleMember.getStatus() == MemberStatus.CONNECTING) {
+            femaleMember.changeStatus(MemberStatus.CONNECTED);
+            log.info("남성 매칭 수락으로 인한 여성 상태 변경: femaleMemberId={}, CONNECTING → CONNECTED", femaleMember.getId());
+        }
+
+        // 같은 남성의 다른 매칭들을 거절 상태로 변경하고, 해당 여성들의 상태도 재매칭 가능하도록 변경
         otherMatchings.forEach(otherMatching -> {
             if (!otherMatching.getId().equals(matchingId)) {
                 otherMatching.reject();
+                
+                // 거절된 매칭의 여성 상태 변경: CONNECTING → APPROVED (재매칭 가능하도록)
+                Member otherFemaleMember = otherMatching.getFemaleMember();
+                if (otherFemaleMember.getStatus() == MemberStatus.CONNECTING) {
+                    otherFemaleMember.changeStatus(MemberStatus.APPROVED);
+                    log.info("남성 매칭 수락으로 인한 다른 여성 상태 변경: femaleMemberId={}, CONNECTING → APPROVED", otherFemaleMember.getId());
+                }
             }
         });
 
-        log.info("남성이 매칭 수락: maleMemberId={}, matchingId={}, femaleMemberId={}, 거절된 매칭 수={}",
-                maleMemberId, matchingId, matching.getFemaleMember().getId(),
+        log.info("남성이 매칭 수락 완료: maleMemberId={}, matchingId={}, femaleMemberId={}, 거절된 매칭 수={}",
+                maleMemberId, matchingId, femaleMember.getId(),
                 otherMatchings.size() - 1);
     }
 
