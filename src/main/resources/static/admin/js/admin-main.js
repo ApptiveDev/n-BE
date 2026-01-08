@@ -429,7 +429,7 @@ function renderFemaleTable(members) {
         <tr>
             <td>${member.id}</td>
             <td>
-                <a href="#" class="member-name-link" onclick="selectFemaleMember(${member.id}, '${member.name}'); return false;">
+                <a href="#" class="member-name-link" onclick="openMemberDetail(${member.id}); return false;">
                     ${member.name}
                 </a>
             </td>
@@ -492,7 +492,11 @@ function renderMatchingCandidates(candidates) {
                        onchange="toggleMaleSelection(${candidate.memberId}, this.checked)">
             </td>
             <td>${candidate.memberId}</td>
-            <td>${candidate.name}</td>
+            <td>
+                <a href="#" class="member-name-link" onclick="openMemberDetail(${candidate.memberId}); return false;">
+                    ${candidate.name}
+                </a>
+            </td>
             <td>${candidate.email}</td>
             <td>${candidate.height || '-'} cm</td>
             <td>${candidate.weight || '-'} kg</td>
