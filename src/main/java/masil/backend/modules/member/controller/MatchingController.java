@@ -32,13 +32,23 @@ public class MatchingController {
     }
     
     //여성이 남성 1명 선택
-    @PostMapping("/{matchingId}/select")
+    @PostMapping("/female/{matchingId}/select")
     public ResponseEntity<Void> selectMaleByFemale(
             @LoginMember MemberDetails memberDetails,
             @PathVariable Long matchingId
     ) {
         log.info("여성이 남성 선택 요청: memberId={}, matchingId={}", memberDetails.memberId(), matchingId);
         matchingService.selectMaleByFemale(memberDetails.memberId(), matchingId);
+        return ResponseEntity.ok().build();
+    }
+
+    //여성이 매칭 거절 (해당 여성의 모든 선택된 매칭을 거절)
+    @PostMapping("/female/reject")
+    public ResponseEntity<Void> rejectMatchingByFemale(
+            @LoginMember MemberDetails memberDetails
+    ) {
+        log.info("여성이 모든 매칭 거절 요청: memberId={}", memberDetails.memberId());
+        matchingService.rejectMatchingByFemale(memberDetails.memberId());
         return ResponseEntity.ok().build();
     }
 
@@ -53,8 +63,8 @@ public class MatchingController {
     }
     
 
-    //남성이 매칭 수락
-    @PostMapping("/{matchingId}/accept")
+    //남성이 매칭 수락 (남성과 여성 모두 CONNECTING → CONNECTED로 상태 변경)
+    @PostMapping("/male/{matchingId}/accept")
     public ResponseEntity<Void> acceptMatchingByMale(
             @LoginMember MemberDetails memberDetails,
             @PathVariable Long matchingId
@@ -65,7 +75,7 @@ public class MatchingController {
     }
     
     //남성이 매칭 거절
-    @PostMapping("/{matchingId}/reject")
+    @PostMapping("/male/{matchingId}/reject")
     public ResponseEntity<Void> rejectMatchingByMale(
             @LoginMember MemberDetails memberDetails,
             @PathVariable Long matchingId
