@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,11 +44,11 @@ public class MemberController {
         return ResponseEntity.ok(profile);
     }
 
-    @GetMapping("/info")
-    public ResponseEntity<MemberInfoResponse> getMyInfo(
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<Void> withdrawMember(
             @LoginMember MemberDetails memberDetails
     ) {
-        final MemberInfoResponse memberInfo = memberHighService.getMemberInfo(memberDetails.memberId());
-        return ResponseEntity.ok(memberInfo);
+        memberHighService.withdrawMember(memberDetails.memberId());
+        return ResponseEntity.noContent().build();
     }
 }
