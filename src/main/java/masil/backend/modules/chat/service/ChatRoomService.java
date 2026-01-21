@@ -127,4 +127,21 @@ public class ChatRoomService {
         
         throw new ChatException(ChatExceptionType.CHAT_ROOM_ACCESS_DENIED);
     }
+    
+    /**
+     * 채팅방의 상대방 ID 추출
+     */
+    public Long getPartnerId(Long chatRoomId, Long memberId) {
+        ChatRoom chatRoom = getChatRoomById(chatRoomId, memberId);
+        Long femaleMemberId = chatRoom.getMatching().getFemaleMember().getId();
+        Long maleMemberId = chatRoom.getMatching().getMaleMember().getId();
+        
+        if (femaleMemberId.equals(memberId)) {
+            return maleMemberId;
+        } else if (maleMemberId.equals(memberId)) {
+            return femaleMemberId;
+        }
+        
+        throw new ChatException(ChatExceptionType.CHAT_ROOM_ACCESS_DENIED);
+    }
 }

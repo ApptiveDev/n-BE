@@ -36,6 +36,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    
+    // STOMP 메시징
+    implementation 'org.springframework:spring-messaging'
 
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
@@ -68,6 +72,13 @@ dependencies {
 
     // FCM push notifications
     implementation 'com.google.firebase:firebase-admin:9.2.0'
+    
+    // Google Cloud Translation API
+    implementation 'com.google.cloud:google-cloud-translate:2.8.0'
+    
+    // 캐싱 (번역 결과 캐싱)
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
 }
 
 dependencyManagement {
