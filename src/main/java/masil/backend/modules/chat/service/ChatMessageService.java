@@ -13,9 +13,11 @@ import masil.backend.modules.chat.repository.ChatMessageRepository;
 import masil.backend.modules.chat.repository.ChatRoomRepository;
 import masil.backend.modules.member.entity.Member;
 import masil.backend.modules.member.enums.Gender;
+import masil.backend.modules.member.service.FcmService;
 import masil.backend.modules.member.service.MemberLowService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,8 @@ public class ChatMessageService {
     private final ChatRoomService chatRoomService;
     private final MemberLowService memberLowService;
     private final TranslationService translationService;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final FcmService fcmService;
     
     /**
      * 메시지 전송 (하이브리드 방식: 원문 즉시 저장, 번역은 비동기로 처리)
@@ -96,6 +100,12 @@ public class ChatMessageService {
             log.info("번역 완료: messageId={}, sourceLanguage={}, targetLanguage={}",
                     message.getId(), message.getLanguage(), targetLanguage);
             
+            // 번역 완료 후 WebSocket으로 업데이트 전송 (발신자 및 수신자 모두에게)
+            sendTranslationUpdate(message);
+            
+            // 번역 완료 후 푸시 알림 전송 (상대방에게만)
+            sendPushNotificationForTranslatedMessage(message);
+            
         } catch (TimeoutException e) {
             log.error("번역 타임아웃: messageId={}", message.getId(), e);
             // 타임아웃 시에도 원문은 이미 저장됨
@@ -103,6 +113,78 @@ public class ChatMessageService {
             log.error("번역 실패: messageId={}", message.getId(), e);
             // 번역 실패해도 원문은 이미 저장됨
             // 필요 시 재시도 큐에 추가하거나 관리자에게 알림
+        }
+    }
+    
+    /**
+     * 번역 완료 후 WebSocket으로 업데이트 전송
+     */
+    private void sendTranslationUpdate(ChatMessage message) {
+        try {
+            ChatRoom chatRoom = chatRoomRepository.findById(message.getChatRoom().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+            
+            Long senderId = message.getSender().getId();
+            Long partnerId = chatRoomService.getPartnerId(chatRoom.getId(), senderId);
+            
+            MessageResponse response = MessageResponse.from(message);
+            
+            // 발신자에게 번역 완료 업데이트 전송
+            messagingTemplate.convertAndSendToUser(
+                    senderId.toString(),
+                    "/queue/messages",
+                    response
+            );
+            
+            // 상대방에게도 번역 완료 업데이트 전송
+            messagingTemplate.convertAndSendToUser(
+                    partnerId.toString(),
+                    "/queue/messages",
+                    response
+            );
+            
+            log.debug("번역 완료 업데이트 전송: messageId={}, senderId={}, partnerId={}",
+                    message.getId(), senderId, partnerId);
+            
+        } catch (Exception e) {
+            log.error("번역 완료 업데이트 전송 실패: messageId={}", message.getId(), e);
+        }
+    }
+    
+    /**
+     * 번역 완료 후 푸시 알림 전송 (상대방에게만)
+     */
+    private void sendPushNotificationForTranslatedMessage(ChatMessage message) {
+        try {
+            ChatRoom chatRoom = chatRoomRepository.findById(message.getChatRoom().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+            
+            Long senderId = message.getSender().getId();
+            Long partnerId = chatRoomService.getPartnerId(chatRoom.getId(), senderId);
+            
+            Member partner = memberLowService.getValidateExistMemberById(partnerId);
+            Member sender = message.getSender();
+            
+            // 상대방의 FCM 토큰이 있으면 푸시 알림 전송
+            if (partner.getFcmToken() != null && !partner.getFcmToken().isBlank()) {
+                String title = sender.getName() != null ? sender.getName() : "메시지";
+                String body = message.getTranslatedContent() != null 
+                        ? message.getTranslatedContent() 
+                        : message.getContent();
+                
+                // 메시지가 너무 길면 잘라서 전송
+                if (body.length() > 100) {
+                    body = body.substring(0, 100) + "...";
+                }
+                
+                fcmService.sendPushNotification(partner.getFcmToken(), title, body);
+                
+                log.debug("번역 완료 푸시 알림 전송: messageId={}, partnerId={}", 
+                        message.getId(), partnerId);
+            }
+            
+        } catch (Exception e) {
+            log.error("번역 완료 푸시 알림 전송 실패: messageId={}", message.getId(), e);
         }
     }
     
