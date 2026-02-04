@@ -83,7 +83,9 @@ public class SecurityConfig {
                                 "/email-code/**",
                                 "/image/**",
                                 "/login/**",
-                                "/member/**"
+                                "/member/**",
+                                "/websocket-test.html",
+                                "/ws/**"  // WebSocket 엔드포인트 허용 (인증은 인터셉터에서 처리)
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

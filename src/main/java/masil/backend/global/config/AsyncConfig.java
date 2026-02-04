@@ -18,4 +18,15 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+    
+    @Bean(name = "translationTaskExecutor")
+    public Executor translationTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);           // 기본 스레드 5개
+        executor.setMaxPoolSize(10);            // 최대 스레드 10개
+        executor.setQueueCapacity(200);        // 대기 큐 200개
+        executor.setThreadNamePrefix("translation-");
+        executor.initialize();
+        return executor;
+    }
 }
